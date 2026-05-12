@@ -8,7 +8,7 @@ import 'new_history_button.dart';
 import 'start_analysis_button.dart';
 import 'browse_gallery_button.dart';
 import 'custom_app_bar.dart';
-import '../result/result_screen.dart';
+import '../result/result_screen/result_screen.dart';
 
 class InputScreen extends StatefulWidget {
   const InputScreen({super.key});

@@ -2,7 +2,7 @@ import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:RiceNutriSense/bounding_box_painter.dart';
-import '../result_screen.dart';
+import '../result_screen/result_screen.dart';
 
 class BoundedCardImage extends StatelessWidget {
   const BoundedCardImage({
