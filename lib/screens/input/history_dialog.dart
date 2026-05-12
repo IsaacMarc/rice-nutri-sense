@@ -1,5 +1,5 @@
-import 'history_entry.dart';
 import 'package:flutter/material.dart';
+import 'history_entry.dart';
 
 class HistoryDialog extends StatelessWidget {
   const HistoryDialog({super.key, required this.history});
@@ -27,14 +27,14 @@ class HistoryDialog extends StatelessWidget {
       constraints: BoxConstraints(
         maxHeight: MediaQuery.of(context).size.height * 0.8,
       ),
-      padding: const EdgeInsets.all(20),
+      padding: const .all(20),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: .circular(20),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: .start,
+        mainAxisSize: .min,
         children: mainContent,
       ),
     );

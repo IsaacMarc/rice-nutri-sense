@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../param_chip.dart';
-import '../result_screen.dart';
+import '../result_screen/result_screen.dart';
 
 class ParametersSummaryBar extends StatelessWidget {
   const ParametersSummaryBar({super.key, required this.widget});

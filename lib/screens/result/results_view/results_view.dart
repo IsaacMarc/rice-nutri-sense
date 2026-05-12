@@ -1,6 +1,6 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
-import '../result_screen.dart';
+import '../result_screen/result_screen.dart';
 import 'alternative_minimal_card.dart';
 import 'bounded_card_image.dart';
 import 'collapsible_logic_panel.dart';
