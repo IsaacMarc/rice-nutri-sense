@@ -1,3 +1,4 @@
 {
-    "dart.flutterSdkPath": "C:\\Users\\Santos\\develop\\flutter"
+    "dart.flutterSdkPath": "C:\\Users\\Santos\\develop\\flutter",
+    "cmake.ignoreCMakeListsMissing": true
 }
