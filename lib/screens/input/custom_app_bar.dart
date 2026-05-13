@@ -12,7 +12,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       Icon(Icons.grass_rounded, color: Colors.green.shade700, size: 28),
       const SizedBox(width: 8),
       const Text(
-        "RiceNutriFinTech",
+        "RiceNutriSense",
         style: TextStyle(fontWeight: .w900, letterSpacing: 0.5),
       ),
     ];

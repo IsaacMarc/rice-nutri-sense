@@ -32,11 +32,11 @@ class _InputScreenState extends State<InputScreen> {
   String fieldSize = "1.5";
 
   @override
-  void initState() async {
+  void initState() {
     super.initState();
     // Check if the user has a profile as soon as the screen loads
     WidgetsBinding.instance.addPostFrameCallback((_) => _checkProfileSetup());
-    await _fetchMarketPrices();
+    _fetchMarketPrices();
   }
 
   void _checkProfileSetup() {
