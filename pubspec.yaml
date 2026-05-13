@@ -1,5 +1,5 @@
 name: rice_nutri_sense
-description: "A new Flutter project."
+description: "A Decentralized Crop Health Scores and Financial Forecasting App."
 publish_to: "none"
 
 version: 1.6.1+1
@@ -16,12 +16,12 @@ dependencies:
     flutter_vision: ^2.0.0 # The YOLOv8 Savior
     hive_flutter: ^1.1.0
     http: ^1.6.0
-    flutter_launcher_icons: ^0.14.4
 
 dev_dependencies:
     flutter_test:
         sdk: flutter
     flutter_lints: ^6.0.0
+    flutter_launcher_icons: ^0.14.4
 
 flutter:
     uses-material-design: true
