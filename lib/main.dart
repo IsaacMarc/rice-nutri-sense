@@ -8,6 +8,7 @@ void main() async {
   await Hive.initFlutter();
   await Hive.openBox('scanHistory');
   await Hive.openBox('userProfile');
+  await Hive.openBox('marketData');
 
   runApp(const RiceSenseApp());
 }
@@ -18,7 +19,7 @@ class RiceSenseApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'RiceNutriFinTech',
+      title: 'RiceNutriSense',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),

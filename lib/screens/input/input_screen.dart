@@ -1,6 +1,10 @@
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+
 import 'package:rice_nutri_sense/screens/input/profile_header.dart';
 import 'package:rice_nutri_sense/screens/input/profile_setup_dialog.dart';
 import 'history_dialog.dart';
@@ -32,6 +36,7 @@ class _InputScreenState extends State<InputScreen> {
     super.initState();
     // Check if the user has a profile as soon as the screen loads
     WidgetsBinding.instance.addPostFrameCallback((_) => _checkProfileSetup());
+    _fetchMarketPrices();
   }
 
   void _checkProfileSetup() {
@@ -105,6 +110,27 @@ class _InputScreenState extends State<InputScreen> {
       ),
       builder: (context) => SafeArea(child: HistoryDialog(history: history)),
     );
+  }
+
+  Future<void> _fetchMarketPrices() async {
+    try {
+      final response = await http.get(
+        Uri.parse('https://agri-fintech-proxy.onrender.com/market-prices'),
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body)['data'];
+        Box<dynamic> box = Hive.box('marketData');
+
+        box.put('palay_fresh_kg', data['palay_fresh_kg']);
+        box.put('urea_46_0_0_bag', data['urea_46_0_0_bag']);
+        box.put('solophos_0_18_0_bag', data['solophos_0_18_0_bag']);
+        box.put('mop_0_0_60_bag', data['mop_0_0_60_bag']);
+
+        debugPrint("📊 Market prices synced successfully.");
+      }
+    } catch (e) {
+      debugPrint("⚠️ Network offline. Using cached market prices.");
+    }
   }
 
   @override

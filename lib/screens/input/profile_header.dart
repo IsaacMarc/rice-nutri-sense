@@ -54,7 +54,7 @@ class _CreditScoreLabel extends StatelessWidget {
       ),
       const SizedBox(height: 4),
       Text(
-        "Credit Score: $score",
+        "Crop Health Score: $score",
         style: TextStyle(
           color: Colors.green.shade100,
           fontSize: 14,
