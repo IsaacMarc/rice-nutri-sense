@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'formatted_text.dart';
 
 class TreatmentPrescriptionCard extends StatelessWidget {
   const TreatmentPrescriptionCard({super.key, required this.advice});
@@ -7,18 +8,24 @@ class TreatmentPrescriptionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final rawText = advice['recommendation'] ?? '';
+    final cleanText = rawText.replaceAll(RegExp(r'\n{3,}'), '\n\n').trim();
+
     final mainContent = [
       const _TreatmentPlanHeader(),
       const Divider(color: Colors.black12, height: 24, thickness: 1),
-      Text(
-        advice['recommendation']!,
-        style: const TextStyle(
-          fontSize: 18,
-          fontWeight: .w600,
+
+      FormattedText(
+        text: cleanText,
+        baseStyle: const TextStyle(
+          fontSize: 16,
+          fontWeight: .w500,
           color: Colors.black87,
+          height: 1.3,
         ),
       ),
-      const SizedBox(height: 12),
+
+      const SizedBox(height: 16),
       _RequiredQuantityDisplay(advice: advice),
     ];
 

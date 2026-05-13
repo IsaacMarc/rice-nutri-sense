@@ -1,77 +1,115 @@
 part of 'result_screen.dart';
 
-extension Analysis on ResultScreenState {
-  Future<String> _backgroundAnalysis(Uint8List bytes) async {
-    try {
-      img.Image? image = img.decodeImage(bytes);
-      if (image == null) return "ERROR";
+// --- PURE TOP-LEVEL FUNCTIONS (Safe for Isolates) ---
+Future<Map<String, dynamic>> runBackgroundAnalysis(Uint8List bytes) async {
+  try {
+    img.Image? image = img.decodeImage(bytes);
+    if (image == null) return _buildErrorPayload();
 
-      img.Image smallImage = img.copyResize(image, width: 120);
-      int count = 0;
+    img.Image smallImage = img.copyResize(image, width: 120);
+    int count = 0;
 
-      int purpleCount = 0;
-      int brownCount = 0;
-      int yellowCount = 0;
+    int purpleCount = 0;
+    int brownCount = 0;
+    int yellowCount = 0;
 
-      for (int i = 0; i < smallImage.length; i += 3) {
-        var pixel = smallImage.getPixel(
-          i % smallImage.width,
-          i ~/ smallImage.width,
-        );
-        final r = pixel.r.toInt();
-        final g = pixel.g.toInt();
-        final b = pixel.b.toInt();
+    for (int i = 0; i < smallImage.length; i += 3) {
+      var pixel = smallImage.getPixel(
+        i % smallImage.width,
+        i ~/ smallImage.width,
+      );
+      final r = pixel.r.toInt();
+      final g = pixel.g.toInt();
+      final b = pixel.b.toInt();
 
-        if ((r + g + b) < 60 || (r + g + b) > 700) continue;
+      if ((r + g + b) < 60 || (r + g + b) > 700) continue;
 
-        count++;
+      count++;
 
-        if (r > (g * 1.15) && b > (g * 1.15)) {
-          purpleCount++;
-        } else if (r > (g * 1.1) && g >= b) {
-          brownCount++;
-        } else if (r > (g * 0.8) && g > b) {
-          yellowCount++;
-        }
+      if (r > (g * 1.15) && b > (g * 1.15)) {
+        purpleCount++;
+      } else if (r > (g * 1.1) && g >= b) {
+        brownCount++;
+      } else if (r > (g * 0.8) && g > b) {
+        yellowCount++;
       }
-
-      if (count == 0) return "Healthy";
-
-      double purplePct = (purpleCount / count) * 100;
-      double brownPct = (brownCount / count) * 100;
-      double yellowPct = (yellowCount / count) * 100;
-
-      if (purplePct >= 50.0) {
-        return "P";
-      }
-      if (brownPct >= 12.0 || (brownPct >= 4.0 && yellowPct >= 15.0)) {
-        return "K";
-      }
-      if (yellowPct >= 30.0) {
-        return "N_Severe";
-      }
-      if (yellowPct >= 12.0) {
-        return "N_Early";
-      }
-
-      return "Healthy";
-    } catch (e) {
-      return "ERROR";
     }
-  }
 
+    if (count == 0) return _buildErrorPayload();
+
+    double purplePct = (purpleCount / count) * 100;
+    double brownPct = (brownCount / count) * 100;
+    double yellowPct = (yellowCount / count) * 100;
+    double greenOrOtherPct = 100.0 - (purplePct + brownPct + yellowPct);
+
+    String diagnosis = "Healthy";
+    double confidence = 90.0;
+
+    if (purplePct >= 50.0) {
+      diagnosis = "P";
+      confidence = 80.0 + ((purplePct - 50.0) / 50.0) * 20.0;
+    } else if (brownPct >= 12.0 || (brownPct >= 4.0 && yellowPct >= 15.0)) {
+      diagnosis = "K";
+      confidence = 80.0 + ((brownPct - 12.0).clamp(0, 88) / 88.0) * 20.0;
+    } else if (yellowPct >= 30.0) {
+      diagnosis = "N_Severe";
+      confidence = 85.0 + ((yellowPct - 30.0).clamp(0, 70) / 70.0) * 15.0;
+    } else if (yellowPct >= 12.0) {
+      diagnosis = "N_Early";
+      confidence = 70.0 + ((yellowPct - 12.0).clamp(0, 18) / 18.0) * 15.0;
+    }
+
+    if (diagnosis == "Healthy" && (purplePct + brownPct + yellowPct) > 20) {
+      confidence -= (purplePct + brownPct + yellowPct) * 0.5;
+    }
+
+    int finalConfidence = confidence.clamp(0, 100).toInt();
+
+    return {
+      "status": finalConfidence >= 70 ? "confident" : "uncertain",
+      "local_diagnosis": diagnosis,
+      "confidence": finalConfidence,
+      "color_data": {
+        "purple": purplePct.toStringAsFixed(1),
+        "brown": brownPct.toStringAsFixed(1),
+        "yellow": yellowPct.toStringAsFixed(1),
+        "green_or_other": greenOrOtherPct.toStringAsFixed(1),
+      },
+    };
+  } catch (e) {
+    return _buildErrorPayload();
+  }
+}
+
+Map<String, dynamic> _buildErrorPayload() {
+  return {
+    "status": "error",
+    "local_diagnosis": "ERROR",
+    "confidence": 0,
+    "color_data": {
+      "purple": "0.0",
+      "brown": "0.0",
+      "yellow": "0.0",
+      "green_or_other": "0.0",
+    },
+  };
+}
+
+extension Analysis on ResultScreenState {
   Map<String, String> _calculateExpertRules(String type) {
     if (widget.age < 15) {
       return {
         "diagnosis": "TOO EARLY",
         "impact":
-            "The plant is still relying entirely on basal fertilizer applied during planting.",
+            "The plant is still relying entirely on basal fertilizer "
+            "applied during planting.",
         "predicted": "${widget.yield} T/Ha",
         "recommendation":
             "Maintain water levels. Rely on standard basal fertilizer.",
         "qty": "N/A",
         "rule":
-            "Crop age (${widget.age} DAT) is too early for visual nutrient diagnosis. Wait until active tillering stage (15+ DAT).",
+            "Crop age (${widget.age} DAT) is too early for visual nutrient "
+            "diagnosis. Wait until active tillering stage (15+ DAT).",
       };
     }
 
@@ -82,7 +120,8 @@ extension Analysis on ResultScreenState {
     String timingAdvice = "";
     if (isEarlyStage && isHighDemand) {
       timingAdvice =
-          "CRITICAL: High yield target (${widget.yield}T). Apply split-dose to maximize tillers.";
+          "CRITICAL: High yield target (${widget.yield}T). Apply split-dose "
+          "to maximize tillers.";
     } else if (isEarlyStage) {
       timingAdvice = "Apply early topdress to support vegetative growth.";
     } else {

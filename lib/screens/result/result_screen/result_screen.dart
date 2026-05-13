@@ -1,14 +1,19 @@
+import 'dart:convert';
 import 'dart:ui' as ui;
 import 'package:image/image.dart' as img;
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_vision/flutter_vision.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'triage_dialog.dart';
 import '../loading_results_view.dart';
 import '../results_view/results_view.dart';
 
 part 'analysis.dart';
+part 'history.dart';
+part 'assessment.dart';
 
 class ResultScreen extends StatefulWidget {
   final int age;
@@ -82,27 +87,86 @@ class ResultScreenState extends State<ResultScreen> {
         _detectedBoxes = List<Map<String, dynamic>>.from(yoloResults);
         setState(() => _debugLog = "Leaf Confirmed. Extracting Pigments...");
 
-        final String deficiency = await compute(
-          _backgroundAnalysis,
+        final Map<String, dynamic> analysisResult = await compute(
+          runBackgroundAnalysis,
           imageBytes,
         );
 
+        // --- PHASE 2: INTERCEPTOR LOGIC ---
+        // CATCH CRITICAL ERRORS FIRST
+        if (analysisResult['status'] == 'error') {
+          if (!mounted) return;
+          setState(() {
+            _advice = _calculateExpertRules(
+              analysisResult['local_diagnosis'] as String,
+            );
+            _isLoading = false;
+          });
+          return; // Stop execution here so it doesn't hit the proxy
+        }
+
+        // THE TRIAGE LOGIC
+        bool useVision = false;
+        if (analysisResult['status'] == 'uncertain') {
+          setState(() => _debugLog = "Awaiting Verification Choice...");
+          bool? useDeepScan = await _showTriageDialog(analysisResult);
+          useVision = useDeepScan == true;
+        }
+
+        if (useVision) {
+          debugPrint(">>> ROUTING TO DEEP VISION PROXY");
+          setState(() => _debugLog = "Running Deep Vision Verification...");
+        } else {
+          debugPrint(">>> ROUTING TO FAST AI PROXY");
+          setState(() => _debugLog = "Generating Financial Risk Assessment...");
+        }
+
+        // EXECUTE CLEANED NETWORK REQUEST
+        final aiData = await _fetchAIAssessment(
+          analysisResult: analysisResult,
+          useVision: useVision,
+          imageBytes: imageBytes,
+        );
+
+        String aiAssessment = aiData['financial_assessment'];
+        int cropScore = aiData['crop_score'];
+
+        // --- TEMPORARY UI RESOLVE (Testing Phase) ---
         if (!mounted) return;
         setState(() {
-          _advice = _calculateExpertRules(deficiency);
+          // Keep the local logic for diagnosis and yield tracking
+          _advice = _calculateExpertRules(
+            analysisResult['local_diagnosis'] as String,
+          );
+
+          // INJECT the AI's financial assessment
+          if (aiAssessment.isNotEmpty) {
+            if (analysisResult['status'] == 'confident') {
+              _advice['recommendation'] =
+                  "FINTECH YIELD & LOAN PREDICTION:\n\n$aiAssessment";
+            } else {
+              _advice['recommendation'] =
+                  "AI DIAGNOSIS & RISK ASSESSMENT:\n\n$aiAssessment";
+            }
+          }
+
           _isLoading = false;
         });
-        _saveToHistory(_advice['diagnosis']!);
+
+        _saveToHistory(_advice['diagnosis']!, cropScore);
       } else {
         if (!mounted) return;
         setState(() {
+          _debugLog = "No Leaf Detected.";
           _advice = {
             "diagnosis": "No Leaf Found",
-            "impact": "System could not locate a leaf.",
+            "impact":
+                "The AI could not confidently identify a rice leaf in the image.",
             "predicted": "N/A",
-            "recommendation": "YOLOv8 confidence below 70%.",
-            "qty": "0 kg",
-            "rule": "Ensure the leaf is well-lit and centered.",
+            "recommendation":
+                "Please ensure the camera is focused clearly on a rice leaf and try again.",
+            "qty": "N/A",
+            "rule": "Vision Model Error: 0 objects detected.",
           };
           _isLoading = false;
         });
@@ -121,39 +185,6 @@ class ResultScreenState extends State<ResultScreen> {
         _isLoading = false;
       });
     }
-  }
-
-  // Save the record to Hive storage
-  void _saveToHistory(String diagnosis) {
-    if (diagnosis == "No Leaf Found" ||
-        diagnosis == "System Error" ||
-        diagnosis == "TOO EARLY") {
-      return;
-    }
-
-    Box<dynamic> box = Hive.box('scanHistory');
-    List history = box.get('scans', defaultValue: []);
-
-    DateTime now = DateTime.now();
-    String formattedDate =
-        "${now.year}-${now.month.toString().padLeft(2, '0')}-"
-        "${now.day.toString().padLeft(2, '0')} "
-        "${now.hour.toString().padLeft(2, '0')}:"
-        "${now.minute.toString().padLeft(2, '0')}";
-
-    Map scanData = {
-      'date': formattedDate,
-      'diagnosis': diagnosis,
-      'age': widget.age,
-      'yield': widget.yield,
-    };
-
-    history.insert(0, scanData);
-
-    // Keep only the top 5
-    if (history.length > 5) history = history.sublist(0, 5);
-
-    box.put('scans', history);
   }
 
   @override
@@ -195,6 +226,14 @@ class ResultScreenState extends State<ResultScreen> {
               primaryStatusColor: primaryStatusColor,
               isWarning: isWarning,
             ),
+    );
+  }
+
+  Future<bool?> _showTriageDialog(Map<String, dynamic> data) async {
+    return showDialog<bool>(
+      context: context,
+      barrierDismissible: false, // Forces the user to make a choice
+      builder: (context) => TriageDialog(data: data),
     );
   }
 }

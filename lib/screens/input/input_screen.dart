@@ -153,7 +153,7 @@ class _InputScreenState extends State<InputScreen> {
     ];
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
-      appBar: _appBar(),
+      appBar: CustomAppBar(),
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
         padding: const .all(20.0),
@@ -164,6 +164,4 @@ class _InputScreenState extends State<InputScreen> {
       ),
     );
   }
-
-  AppBar _appBar() => const CustomAppBar() as AppBar;
 }

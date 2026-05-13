@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
-class CustomAppBar extends StatelessWidget {
+class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   const CustomAppBar({super.key});
+
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 
   @override
   Widget build(BuildContext context) {
@@ -9,7 +12,7 @@ class CustomAppBar extends StatelessWidget {
       Icon(Icons.grass_rounded, color: Colors.green.shade700, size: 28),
       const SizedBox(width: 8),
       const Text(
-        "RiceNutriSense",
+        "rice_nutri_sense",
         style: TextStyle(fontWeight: .w900, letterSpacing: 0.5),
       ),
     ];

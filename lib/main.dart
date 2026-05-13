@@ -1,4 +1,4 @@
-import 'package:RiceNutriSense/screens/input/input_screen.dart';
+import 'package:rice_nutri_sense/screens/input/input_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
@@ -7,6 +7,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
   await Hive.openBox('scanHistory');
+  await Hive.openBox('userProfile');
 
   runApp(const RiceSenseApp());
 }
@@ -17,7 +18,7 @@ class RiceSenseApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'RiceNutriSense',
+      title: 'rice_nutri_sense',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
