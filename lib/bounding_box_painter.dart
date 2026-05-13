@@ -1,8 +1,9 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:rice_nutri_sense/core/data_types.dart';
 
 class BoundingBoxPainter extends CustomPainter {
-  final List<Map<String, dynamic>> boxes;
+  final List<StringDynamicMap> boxes;
   final ui.Image originalImage;
 
   BoundingBoxPainter(this.boxes, this.originalImage);

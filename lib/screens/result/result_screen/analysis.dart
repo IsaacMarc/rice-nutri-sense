@@ -1,7 +1,7 @@
 part of 'result_screen.dart';
 
 // --- PURE TOP-LEVEL FUNCTIONS (Safe for Isolates) ---
-Future<Map<String, dynamic>> runBackgroundAnalysis(Uint8List bytes) async {
+Future<StringDynamicMap> runBackgroundAnalysis(Uint8List bytes) async {
   try {
     img.Image? image = img.decodeImage(bytes);
     if (image == null) return _buildErrorPayload();
@@ -81,7 +81,7 @@ Future<Map<String, dynamic>> runBackgroundAnalysis(Uint8List bytes) async {
   }
 }
 
-Map<String, dynamic> _buildErrorPayload() {
+StringDynamicMap _buildErrorPayload() {
   return {
     "status": "error",
     "local_diagnosis": "ERROR",

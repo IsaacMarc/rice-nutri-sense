@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:rice_nutri_sense/bounding_box_painter.dart';
+import 'package:rice_nutri_sense/core/data_types.dart';
 import '../result_screen/result_screen.dart';
 
 class BoundedCardImage extends StatelessWidget {
@@ -14,7 +15,7 @@ class BoundedCardImage extends StatelessWidget {
 
   final ui.Image? nativeImage;
   final ResultScreen widget;
-  final List<Map<String, dynamic>> detectedBoxes;
+  final List<StringDynamicMap> detectedBoxes;
 
   @override
   Widget build(BuildContext context) {

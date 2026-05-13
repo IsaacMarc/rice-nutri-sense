@@ -1,8 +1,8 @@
 part of 'result_screen.dart';
 
 extension Assessment on ResultScreenState {
-  Future<Map<String, dynamic>> _fetchAIAssessment({
-    required Map<String, dynamic> analysisResult,
+  Future<StringDynamicMap> _fetchAIAssessment({
+    required StringDynamicMap analysisResult,
     required bool useVision,
     Uint8List? imageBytes,
   }) async {
@@ -13,7 +13,7 @@ extension Assessment on ResultScreenState {
     final int fallbackScore = analysisResult['confidence'] ?? 50;
 
     try {
-      final Map<String, dynamic> payload;
+      final StringDynamicMap payload;
       if (useVision && imageBytes != null) {
         payload = {'image_base64': base64Encode(imageBytes)};
       } else {

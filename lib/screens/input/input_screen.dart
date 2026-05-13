@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:rice_nutri_sense/screens/input/profile_header.dart';
+import 'package:rice_nutri_sense/screens/input/profile_setup_dialog.dart';
 import 'history_dialog.dart';
 import 'styled_text_field.dart';
 import 'image_display.dart';
@@ -24,6 +26,27 @@ class _InputScreenState extends State<InputScreen> {
   String cropAge = "35";
   String targetYield = "5.0";
   String fieldSize = "1.5";
+
+  @override
+  void initState() {
+    super.initState();
+    // Check if the user has a profile as soon as the screen loads
+    WidgetsBinding.instance.addPostFrameCallback((_) => _checkProfileSetup());
+  }
+
+  void _checkProfileSetup() {
+    Box<dynamic> box = Hive.box('userProfile');
+    // If the name is null, it's a new user
+    if (box.get('name') == null) _showProfileSetupDialog();
+  }
+
+  void _showProfileSetupDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Force them to set it up
+      builder: (context) => ProfileSetupDialog(),
+    );
+  }
 
   Future<void> _pickImage(ImageSource source) async {
     try {
@@ -71,7 +94,7 @@ class _InputScreenState extends State<InputScreen> {
   }
 
   void _showHistory() {
-    var box = Hive.box('scanHistory');
+    Box<dynamic> box = Hive.box('scanHistory');
     List history = box.get('scans', defaultValue: []);
 
     showModalBottomSheet(
@@ -80,13 +103,14 @@ class _InputScreenState extends State<InputScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: .vertical(top: .circular(20)),
       ),
-      builder: (context) => HistoryDialog(history: history),
+      builder: (context) => SafeArea(child: HistoryDialog(history: history)),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final mainContent = [
+      const ProfileHeader(),
       const Text(
         "Field Parameters",
         style: TextStyle(
@@ -153,13 +177,19 @@ class _InputScreenState extends State<InputScreen> {
     ];
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
-      appBar: CustomAppBar(),
-      body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        padding: const .all(20.0),
-        child: Form(
-          key: _formKey,
-          child: Column(crossAxisAlignment: .start, children: mainContent),
+      appBar: const CustomAppBar(),
+      body: SafeArea(
+        top: false,
+        left: false,
+        right: false,
+        bottom: true,
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          padding: const .all(20.0),
+          child: Form(
+            key: _formKey,
+            child: Column(crossAxisAlignment: .start, children: mainContent),
+          ),
         ),
       ),
     );
