@@ -7,6 +7,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
   await Hive.openBox('scanHistory');
+  await Hive.openBox('userProfile');
 
   runApp(const RiceSenseApp());
 }
