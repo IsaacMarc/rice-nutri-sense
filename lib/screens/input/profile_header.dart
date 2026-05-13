@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import '../dashboard/credit_dashboard_screen.dart';
+import '../dashboard/credit_dashboard/credit_dashboard_screen.dart';
 import '../dashboard/profile_settings_screen.dart';
 
 class ProfileHeader extends StatelessWidget {
