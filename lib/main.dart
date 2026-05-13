@@ -8,6 +8,7 @@ void main() async {
   await Hive.initFlutter();
   await Hive.openBox('scanHistory');
   await Hive.openBox('userProfile');
+  await Hive.openBox('marketData');
 
   runApp(const RiceSenseApp());
 }

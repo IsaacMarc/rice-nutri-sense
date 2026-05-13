@@ -9,7 +9,7 @@ import 'deficiency_impact_block.dart';
 import 'diagnosis_status_card.dart';
 import 'parameters_summary_bar.dart';
 import 'treatment_prescription_card.dart';
-import 'yield_predictor_ui.dart';
+import 'yield_predictor/yield_predictor_ui.dart';
 import 'agent_assessment_card.dart';
 
 class ResultsView extends StatelessWidget {
