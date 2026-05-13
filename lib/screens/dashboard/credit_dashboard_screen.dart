@@ -34,6 +34,8 @@ class CreditDashboardScreen extends StatelessWidget {
                 _buildScoreCard(creditScore),
                 const SizedBox(height: 24),
                 _buildLoanEligibilityCard(creditScore),
+                const SizedBox(height: 24),
+                _buildTrustMetricsCard(box),
               ],
             ),
           );
@@ -179,6 +181,77 @@ class CreditDashboardScreen extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildTrustMetricsCard(Box profileBox) {
+    // Calculate Account Age
+    String createdAtStr = profileBox.get(
+      'created_at',
+      defaultValue: DateTime.now().toIso8601String(),
+    );
+    DateTime createdAt = DateTime.parse(createdAtStr);
+    int daysActive = DateTime.now().difference(createdAt).inDays;
+
+    // Calculate Backing Data
+    Box historyBox = Hive.box('scanHistory');
+    int totalScans = historyBox.get('scans', defaultValue: []).length;
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "DATA VALIDITY METRICS",
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey,
+              letterSpacing: 1.2,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _metricBlock(
+                Icons.calendar_month,
+                "Account Age",
+                "$daysActive Days",
+              ),
+              _metricBlock(Icons.history, "History Logs", "$totalScans Scans"),
+              _metricBlock(
+                Icons.verified_user,
+                "Status",
+                daysActive > 7 && totalScans > 3 ? "Verified" : "Pending",
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _metricBlock(IconData icon, String label, String value) {
+    return Column(
+      children: [
+        Icon(icon, color: Colors.green.shade700, size: 28),
+        const SizedBox(height: 8),
+        Text(
+          value,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
+        Text(
+          label,
+          style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+        ),
+      ],
     );
   }
 }

@@ -7,6 +7,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_vision/flutter_vision.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:rice_nutri_sense/core/assets.dart';
+import 'package:rice_nutri_sense/core/data_types.dart';
 import 'triage_dialog.dart';
 import '../loading_results_view.dart';
 import '../results_view/results_view.dart';
@@ -39,7 +41,7 @@ class ResultScreenState extends State<ResultScreen> {
   String _debugLog = "Initializing AI Engine...";
   Map<String, String> _advice = {};
 
-  List<Map<String, dynamic>> _detectedBoxes = [];
+  List<StringDynamicMap> _detectedBoxes = [];
   ui.Image? _nativeImage;
 
   @override
@@ -60,8 +62,8 @@ class ResultScreenState extends State<ResultScreen> {
       setState(() => _debugLog = "Loading YOLOv8...");
 
       await vision.loadYoloModel(
-        labels: 'assets/labels.txt',
-        modelPath: 'assets/best_float32.tflite',
+        labels: AppAssets.labels,
+        modelPath: AppAssets.bestFloat32,
         modelVersion: "yolov8",
         numThreads: 2,
         useGpu: false,
@@ -84,10 +86,10 @@ class ResultScreenState extends State<ResultScreen> {
       );
 
       if (yoloResults.isNotEmpty) {
-        _detectedBoxes = List<Map<String, dynamic>>.from(yoloResults);
+        _detectedBoxes = List<StringDynamicMap>.from(yoloResults);
         setState(() => _debugLog = "Leaf Confirmed. Extracting Pigments...");
 
-        final Map<String, dynamic> analysisResult = await compute(
+        final StringDynamicMap analysisResult = await compute(
           runBackgroundAnalysis,
           imageBytes,
         );
@@ -139,15 +141,12 @@ class ResultScreenState extends State<ResultScreen> {
             analysisResult['local_diagnosis'] as String,
           );
 
-          // INJECT the AI's financial assessment
+          // Add the AI assessment as a SEPARATE key-value pair
           if (aiAssessment.isNotEmpty) {
-            if (analysisResult['status'] == 'confident') {
-              _advice['recommendation'] =
-                  "FINTECH YIELD & LOAN PREDICTION:\n\n$aiAssessment";
-            } else {
-              _advice['recommendation'] =
-                  "AI DIAGNOSIS & RISK ASSESSMENT:\n\n$aiAssessment";
-            }
+            _advice['ai_assessment'] = aiAssessment;
+
+            // 'confident' or 'uncertain'
+            _advice['ai_confidence'] = analysisResult['status'];
           }
 
           _isLoading = false;
@@ -214,22 +213,28 @@ class ResultScreenState extends State<ResultScreen> {
         surfaceTintColor: Colors.transparent,
         elevation: 0.5,
       ),
-      body: _isLoading
-          ? LoadingResultsView(debugLog: _debugLog)
-          : ResultsView(
-              nativeImage: _nativeImage,
-              widget: widget,
-              detectedBoxes: _detectedBoxes,
-              advice: _advice,
-              isHealthy: isHealthy,
-              statusIcon: statusIcon,
-              primaryStatusColor: primaryStatusColor,
-              isWarning: isWarning,
-            ),
+      body: SafeArea(
+        top: false,
+        left: false,
+        right: false,
+        bottom: true,
+        child: _isLoading
+            ? LoadingResultsView(debugLog: _debugLog)
+            : ResultsView(
+                nativeImage: _nativeImage,
+                widget: widget,
+                detectedBoxes: _detectedBoxes,
+                advice: _advice,
+                isHealthy: isHealthy,
+                statusIcon: statusIcon,
+                primaryStatusColor: primaryStatusColor,
+                isWarning: isWarning,
+              ),
+      ),
     );
   }
 
-  Future<bool?> _showTriageDialog(Map<String, dynamic> data) async {
+  Future<bool?> _showTriageDialog(StringDynamicMap data) async {
     return showDialog<bool>(
       context: context,
       barrierDismissible: false, // Forces the user to make a choice

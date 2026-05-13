@@ -2,7 +2,7 @@ name: rice_nutri_sense
 description: "A new Flutter project."
 publish_to: "none"
 
-version: 1.3.0+1
+version: 1.4.0+1
 
 environment:
     sdk: ^3.11.3
@@ -16,6 +16,7 @@ dependencies:
     flutter_vision: ^2.0.0 # The YOLOv8 Savior
     hive_flutter: ^1.1.0
     http: ^1.6.0
+    flutter_launcher_icons: ^0.14.4
 
 dev_dependencies:
     flutter_test:

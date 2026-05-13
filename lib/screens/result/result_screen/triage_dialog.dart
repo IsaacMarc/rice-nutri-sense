@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:rice_nutri_sense/core/data_types.dart';
 
 class TriageDialog extends StatelessWidget {
   const TriageDialog({super.key, required this.data});
 
-  final Map<String, dynamic> data;
+  final StringDynamicMap data;
 
   @override
   Widget build(BuildContext context) {
