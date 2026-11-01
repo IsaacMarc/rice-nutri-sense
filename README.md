@@ -5,3 +5,4 @@ Empowering Philippine Rice Farmers with Decentralized Crop Health Scores and Fin
 ## Info
 
 This project has been made for a hackathon :)
+- we lost
